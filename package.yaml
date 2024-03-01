@@ -21,6 +21,7 @@ description:         Please see the README on GitHub at <https://github.com/glyn
 
 dependencies:
 - base >= 4.7 && < 5
+- aeson >= 2.2.1.0 && < 2.3
 
 ghc-options:
 - -Wall
