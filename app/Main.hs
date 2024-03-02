@@ -2,8 +2,9 @@
 
 module Main (main) where
 
-import Control.Monad.Trans.List (ListT(..))
+import Control.Monad.Trans.List (runListT)
 import Data.Aeson
+import Data.Maybe (fromMaybe)
 import Lib
 
 
@@ -11,7 +12,7 @@ main :: IO ()
 
 main = do
     let ioAction = runListT $ do
-         nl <- root decode "{\"foo\": 123}" -- :: Maybe Value
+         nl <- root $ fromMaybe undefined decode "{\"foo\": 123}"
          fmap childWildcard nl
              
     -- Execute the IO action and print each nodelist

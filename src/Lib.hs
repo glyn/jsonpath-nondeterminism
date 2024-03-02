@@ -6,7 +6,9 @@ module Lib
     ) where
 
 import Data.Aeson
-import Data.List
+import Data.Aeson.KeyMap (elems)
+import Data.List (permutations)
+import Data.Vector (toList)
 
 type Nodelist = [Value] -- omit locations
 type Query = Value -> [Nodelist]

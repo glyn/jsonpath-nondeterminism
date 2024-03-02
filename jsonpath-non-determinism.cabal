@@ -36,6 +36,9 @@ library
   build-depends:
       aeson >=2.1 && <2.3
     , base >=4.7 && <5
+    , containers ==0.6.*
+    , transformers ==0.6.*
+    , vector ==0.13.*
   default-language: Haskell2010
 
 executable jsonpath-non-determinism-exe
@@ -50,7 +53,10 @@ executable jsonpath-non-determinism-exe
   build-depends:
       aeson >=2.1 && <2.3
     , base >=4.7 && <5
+    , containers ==0.6.*
     , jsonpath-non-determinism
+    , transformers ==0.6.*
+    , vector ==0.13.*
   default-language: Haskell2010
 
 test-suite jsonpath-non-determinism-test
@@ -66,5 +72,8 @@ test-suite jsonpath-non-determinism-test
   build-depends:
       aeson >=2.1 && <2.3
     , base >=4.7 && <5
+    , containers ==0.6.*
     , jsonpath-non-determinism
+    , transformers ==0.6.*
+    , vector ==0.13.*
   default-language: Haskell2010
