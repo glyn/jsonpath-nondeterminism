@@ -11,6 +11,7 @@ import Data.List (permutations)
 import Data.Vector (toList)
 
 type Nodelist = [Value] -- omit locations
+
  -- Generalise a RFC 9535 query to return a list of possible results (nodelists).
  -- If there is one item in the list, the query is deterministic.Applicative
  -- If there is more than one item in the list, the query is non-deterministic.
