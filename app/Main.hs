@@ -11,7 +11,7 @@ main :: IO ()
 
 main = do
          let result = do
-                        nl <- root $ fromMaybe undefined (decode "{\"foo\": 123}")
+                        nl <- root $ fromMaybe undefined (decode "{\"foo\": 123, \"bar\": 456}")
                         fmap childWildcard nl in        
             mapM_ print result
 
