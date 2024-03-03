@@ -4,6 +4,7 @@
 module Main (main) where
 
 import Data.Aeson
+import qualified Data.ByteString.Lazy.Char8 as BSL
 import Data.Maybe (fromMaybe)
 import Lib
 
@@ -11,7 +12,7 @@ import Lib
 main :: IO ()
 
 main = do
-         mapM_ print [
+         mapM_ (BSL.putStrLn . encode) [
             do -- [*] applied to an object
               nl <- root $ fromMaybe undefined (decode "{\"foo\": 123, \"bar\": 456}")
               concatMap childWildcard nl,
