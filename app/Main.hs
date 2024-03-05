@@ -13,22 +13,24 @@ main :: IO ()
 
 main = do
          mapM_ (BSL.putStrLn . encode) ([
-            -- do -- [*] applied to an object
-            --   nl :: Nodelist <- root $ fromMaybe undefined (decode "{\"foo\": 123, \"bar\": 456}")
-            --   childWildcard nl
-            --   ,
-            -- do -- [*][*] applied to an object of objects
-            --   -- DEBUG: we are in the list monad so the following binds nl to the Nodelist in the list returned from root
-            --   nl :: Nodelist <- root $ fromMaybe undefined (decode "{\"x\": {\"a\": 1, \"b\":2 }, \"y\": {\"c\": 3, \"d\": 4}}")
+            do -- [*] applied to an object
+              nl :: Nodelist <- root $ fromMaybe undefined (decode "{\"foo\": 123, \"bar\": 456}")
+              childWildcard nl,
+            do -- [*][*] applied to an object of objects
+              -- DEBUG: we are in the list monad so the following binds nl to the Nodelist in the list returned from root
+              nl :: Nodelist <- root $ fromMaybe undefined (decode "{\"x\": {\"a\": 1, \"b\":2 }, \"y\": {\"c\": 3, \"d\": 4}}")
 
-            --   -- The following maps childWildcard over nl and concatenates the resultant nodelists.
-            --    -- expect 4 possibilities, but got 8 with some duplicates
-            --    -- TODO: understand this
-            --   nl' :: Nodelist <- concatMap childWildcard nl
-            --   concatMap childWildcard nl'
-            ] :: [Nodelist])
+              -- The following maps childWildcard over nl and concatenates the resultant nodelists.
+               -- expect 4 possibilities, but got 8 with some duplicates
+               -- TODO: understand this
+              nl' :: Nodelist <- childWildcard nl
+              childWildcard nl'
+            ] :: [[Nodelist]])
 
-fred :: [Nodelist]
-fred = do
-         nl :: Nodelist <- root $ fromMaybe undefined (decode "{\"foo\": 123, \"bar\": 456}")
-         childWildcard nl
+-- fred :: [Nodelist]
+-- fred = do
+--          nl :: Nodelist <- root $ fromMaybe undefined (decode "{\"foo\": 123, \"bar\": 456}")
+--          childWildcard nl
+
+-- printAll :: [[Nodelist]] -> IO ()
+-- printAll = mapM_ (BSL.putStrLn . encode)
