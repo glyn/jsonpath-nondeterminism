@@ -32,7 +32,7 @@ childWildcard [] = [[]]
 childWildcard (n:ns) = do
     l <- cw n
     r <- childWildcard ns
-    [l, r]
+    if null r then if null l then [] else [l] else if null l then [r] else [l, r]
     where cw :: Value -> [Nodelist] -- input value must be a child of the argument
           cw (Object o) = permutations $ elems o
           cw (Array a) = [toList a]
