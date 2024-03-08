@@ -23,7 +23,9 @@ main = do
               childWildcard nl',
             do -- [*,*] applied to an object (derived from non-deterministic example in Table 5 of RFC 9535)
               nl :: Nodelist <- root $ fromMaybe undefined (decode "{\"j\": 1, \"k\": 2}")
-              childDoubleWildcard nl
+              w1 <- childWildcard nl
+              w2 <- childWildcard nl
+              return (w1 ++ w2)
             ] :: [[Nodelist]])
 
 uniq :: Ord a => [a] -> [a]
