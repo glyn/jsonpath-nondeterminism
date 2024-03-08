@@ -22,6 +22,7 @@ description:         Please see the README on GitHub at <https://github.com/glyn
 dependencies:
 - base >= 4.7 && < 5
 - aeson >= 2.1 && < 2.3
+- aeson-qq >= 0.8 && < 0.9
 - bytestring >= 0.11 && < 0.12
 - containers >= 0.6 && < 0.7
 - vector >= 0.13 && < 0.14

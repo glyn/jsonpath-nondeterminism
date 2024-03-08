@@ -36,3 +36,8 @@ childWildcard (n:ns) = do
           children (Object o) = permutations $ elems o
           children (Array a) = [toList a]
           children _ = [[]]
+
+-- descendantWildcard is a query corresponding to ..[*]
+-- It is non-deterministic when it traverses over an object with more than one member
+descendantWildcard :: Query
+descendantWildcard = undefined -- TODO

@@ -35,6 +35,7 @@ library
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       aeson >=2.1 && <2.3
+    , aeson-qq ==0.8.*
     , base >=4.7 && <5
     , bytestring ==0.11.*
     , containers ==0.6.*
@@ -53,6 +54,7 @@ executable jsonpath-non-determinism-exe
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson >=2.1 && <2.3
+    , aeson-qq ==0.8.*
     , base >=4.7 && <5
     , bytestring ==0.11.*
     , containers ==0.6.*
@@ -73,6 +75,7 @@ test-suite jsonpath-non-determinism-test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson >=2.1 && <2.3
+    , aeson-qq ==0.8.*
     , base >=4.7 && <5
     , bytestring ==0.11.*
     , containers ==0.6.*
