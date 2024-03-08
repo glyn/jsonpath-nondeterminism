@@ -13,10 +13,6 @@ import Lib
 
 main :: IO ()
 
--- TODO
--- 1. Try to find better syntax for inline JSON
--- 2. Add [*][*] for an object of arrays and objects
-
 main = do
          mapM_ (BSL.putStrLn . encode . uniq) ([
             do -- [*] applied to an object (dervied from $.o[*] example of Table 6 in RFC 9535)
@@ -28,7 +24,15 @@ main = do
               w2 <- childWildcard nl
               return (w1 ++ w2),
             do -- [*][*] applied to an object of objects
-              nl :: Nodelist <- root [aesonQQ| {"x": {"a": 1, "b":2 }, "y": {"c": 3, "d": 4}} |]
+              nl :: Nodelist <- root [aesonQQ| { "x": {"a": 1, "b": 2}
+                                               , "y": {"c": 3, "d": 4}
+                                               } |]
+              nl' :: Nodelist <- childWildcard nl
+              childWildcard nl',
+            do -- [*][*] applied to an object of arrays/objects
+              nl :: Nodelist <- root [aesonQQ| { "x": {"a": 1, "b": 2}
+                                               , "y": [3, 4]
+                                               } |]
               nl' :: Nodelist <- childWildcard nl
               childWildcard nl'
             ] :: [[Nodelist]])
