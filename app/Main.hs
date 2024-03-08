@@ -34,6 +34,12 @@ main = do
                                                , "y": [3, 4]
                                                } |]
               nl' :: Nodelist <- childWildcard nl
+              childWildcard nl',
+            do -- [*][*] applied to an array of objects
+              nl :: Nodelist <- root [aesonQQ| [ {"a": 1, "b": 2}
+                                               , {"c": 3, "d": 4}
+                                               ] |]
+              nl' :: Nodelist <- childWildcard nl
               childWildcard nl'
             ] :: [[Nodelist]])
 
