@@ -5,6 +5,7 @@ module Lib
     , Query
     , root
     , childWildcard
+    , childDoubleWildcard
     ) where
 
 import Data.Aeson
@@ -36,3 +37,12 @@ childWildcard (n:ns) = do
           children (Object o) = permutations $ elems o
           children (Array a) = [toList a]
           children _ = [[]]
+
+-- childWildcard is a query corresponding to [*,*]
+-- It is non-deterministic when applied to an object with more than one member.
+childDoubleWildcard :: Query
+childDoubleWildcard [] = [[]]
+childDoubleWildcard nl = do
+    l :: Nodelist <- childWildcard nl
+    r :: Nodelist <- childWildcard nl
+    return (l ++ r)
