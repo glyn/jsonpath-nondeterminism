@@ -40,7 +40,22 @@ main = do
                                                , {"c": 3, "d": 4}
                                                ] |]
               nl' :: Nodelist <- childWildcard nl
-              childWildcard nl'
+              childWildcard nl',
+            do -- ..[*] applied to an array containing a non-empty array and something else
+              nl :: Nodelist <- root [aesonQQ| [ [1]
+                                               , 2
+                                               ] |]
+              descendantWildcard nl,
+            do -- ..[*] applied to an object 
+              nl :: Nodelist <- root [aesonQQ| { "x" : 1
+                                               , "y" : 2
+                                               } |]
+              descendantWildcard nl,
+            do -- ..[*] applied to an object containing an array
+              nl :: Nodelist <- root [aesonQQ| { "x" : [1]
+                                               , "y" : [2]
+                                               } |]
+              descendantWildcard nl
             ] :: [[Nodelist]])
 
 -- Remove duplicates from the input list
