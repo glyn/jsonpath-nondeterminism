@@ -62,7 +62,6 @@ objectChildren p km = [(p++[Member $ K.toString k],v) | (k,v) <- KM.toList km]
 arrayChildren :: Path -> Vector Value -> [(Path, Value)]
 arrayChildren p v = [(p++[Element i], v ! i) | i <- [0.. length (toList v) - 1]]
 
-
 validDescendantOrdering :: [(Path,Value)] -> Bool
 validDescendantOrdering [] = True
 validDescendantOrdering [_] = True
