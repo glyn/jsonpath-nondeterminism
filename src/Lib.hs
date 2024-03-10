@@ -34,10 +34,11 @@ childWildcard (n:ns) = do
     l :: Nodelist <- children n
     r :: Nodelist <- childWildcard ns
     return (l ++ r)
-    where children :: Value -> [Nodelist] -- input value must be a child of the argument
-          children (Object o) = permutations $ KM.elems o
-          children (Array a) = [toList a]
-          children _ = [[]]
+
+children :: Value -> [Nodelist] -- input value must be a child of the argument
+children (Object o) = permutations $ KM.elems o
+children (Array a) = [toList a]
+children _ = [[]]
 
 -- descendantWildcard is a query corresponding to ..[*]
 -- It is non-deterministic when it traverses over an object with more than one member
@@ -45,8 +46,9 @@ descendantWildcard :: Query
 descendantWildcard [] = [[]]
 descendantWildcard (n:ns) = do
     l :: Nodelist <- map (map snd) $ filter validDescendantOrdering $ permutations $ descendants [] n
+    m :: Nodelist <- concatMap children l -- FIXME: this destroys the structure!
     r :: Nodelist <- descendantWildcard ns
-    return (l ++ r)
+    return (m ++ r)
     where descendants :: Path -> Value -> [(Path,Value)] -- input value must be a child of the argument at location denoted by the input path
           descendants p (Object o) = objectChildren p o ++ [ x | (k,v) <- KM.toList o, x <- descendants (p++[Member $ K.toString k]) v]
           descendants p (Array a) = arrayChildren p a ++ [x | i <- [0..(length a - 1)], x <- descendants (p++[Element i]) $ a ! i]
