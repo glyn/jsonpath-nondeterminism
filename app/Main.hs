@@ -51,7 +51,7 @@ main = do
                                                , "y": 2
                                                } |]
               descendantWildcard nl,
-            do -- ..[*] applied to an object containing an array
+            do -- ..[*] applied to an object containing arrays
               nl :: Nodelist <- root [aesonQQ| { "x": [1]
                                                , "y": [2]
                                                } |]
@@ -59,6 +59,11 @@ main = do
             do -- ..[*] applied to an object containing an object and an array
               nl :: Nodelist <- root [aesonQQ| { "x": {"a": 1}
                                                , "y": [3]
+                                               } |]
+              descendantWildcard nl,
+            do -- ..[*] applied to an object containing objects
+              nl :: Nodelist <- root [aesonQQ| { "x": {"a": 1}
+                                               , "y": {"c": 3}
                                                } |]
               descendantWildcard nl
             ] :: [[Nodelist]])
