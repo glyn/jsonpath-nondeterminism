@@ -14,7 +14,7 @@ import Lib
 main :: IO ()
 
 main = do
-         mapM_ (BSL.putStrLn . encode . uniq) ([
+         mapM_ (BSL.putStrLn . addNewline . encode . uniq) ([
             do -- [*] applied to an object (dervied from $.o[*] example of Table 6 in RFC 9535)
               nl :: Nodelist <- root [aesonQQ| {"j": 1, "k": 2} |]
               childWildcard nl,
@@ -47,13 +47,18 @@ main = do
                                                ] |]
               descendantWildcard nl,
             do -- ..[*] applied to an object 
-              nl :: Nodelist <- root [aesonQQ| { "x" : 1
-                                               , "y" : 2
+              nl :: Nodelist <- root [aesonQQ| { "x": 1
+                                               , "y": 2
                                                } |]
               descendantWildcard nl,
             do -- ..[*] applied to an object containing an array
-              nl :: Nodelist <- root [aesonQQ| { "x" : [1]
-                                               , "y" : [2]
+              nl :: Nodelist <- root [aesonQQ| { "x": [1]
+                                               , "y": [2]
+                                               } |]
+              descendantWildcard nl,
+            do -- ..[*] applied to an object containing an object and an array
+              nl :: Nodelist <- root [aesonQQ| { "x": {"a": 1}
+                                               , "y": [3]
                                                } |]
               descendantWildcard nl
             ] :: [[Nodelist]])
@@ -62,3 +67,6 @@ main = do
 -- The implementation ensures that the result list is sorted
 uniq :: Ord a => [a] -> [a]
 uniq = toList . fromList
+
+addNewline :: BSL.ByteString -> BSL.ByteString
+addNewline bs = BSL.snoc bs '\n'
