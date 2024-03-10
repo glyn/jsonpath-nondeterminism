@@ -49,7 +49,7 @@ descendantWildcard (n:ns) = do
     return (l ++ r)
     where descendants :: Path -> Value -> [(Path,Value)] -- input value must be a child of the argument at location denoted by the input path
           descendants p (Object o) = objectChildren p o ++ [ x | (k,v) <- KM.toList o, x <- descendants (p++[Member $ K.toString k]) v]
-          descendants p (Array a) = arrayChildren p a ++ [x | n <- [0..(length a - 1)], x <- descendants (p++[Element n]) $ a ! n]
+          descendants p (Array a) = arrayChildren p a ++ [x | i <- [0..(length a - 1)], x <- descendants (p++[Element i]) $ a ! i]
           descendants _ _ = []
 
 type Path = [PathItem]
@@ -66,17 +66,17 @@ arrayChildren p v = [(p++[Element i], v ! i) | i <- [0.. length (toList v) - 1]]
 validDescendantOrdering :: [(Path,Value)] -> Bool
 validDescendantOrdering [] = True
 validDescendantOrdering [_] = True
-validDescendantOrdering (x:y:xs) = not (invalidBefore x y) && validDescendantOrdering (x:xs) && validDescendantOrdering (y:xs)
+validDescendantOrdering (x@(px,_):y@(py,_):xs) = validBefore px py && validDescendantOrdering (x:xs) && validDescendantOrdering (y:xs)
 
-invalidBefore :: (Path,Value) -> (Path,Value) -> Bool
-invalidBefore x y = childBeforeParent x y || arrayElementsOutOfOrder x y
+validBefore :: Path -> Path -> Bool
+validBefore x y = not (childBeforeParent x y || arrayElementsOutOfOrder x y)
 
-childBeforeParent :: (Path,Value) -> (Path,Value) -> Bool
-childBeforeParent ([],_) (_,_) = False
-childBeforeParent (p,_) (q,_) = init p == q
+childBeforeParent :: Path -> Path -> Bool
+childBeforeParent [] _ = False
+childBeforeParent p q = init p == q
     
-arrayElementsOutOfOrder :: (Path,Value) -> (Path,Value) -> Bool
-arrayElementsOutOfOrder ([],_) (_,_) = False  
-arrayElementsOutOfOrder (_,_) ([],_) = False  
-arrayElementsOutOfOrder ([Element m],_) ([Element n],_) = m >= n  
-arrayElementsOutOfOrder (p:ps,v) (q:qs,w) = p == q && arrayElementsOutOfOrder (ps,v) (qs,w) 
+arrayElementsOutOfOrder :: Path -> Path -> Bool
+arrayElementsOutOfOrder [] _ = False  
+arrayElementsOutOfOrder _ [] = False  
+arrayElementsOutOfOrder [Element m] [Element n] = m >= n  
+arrayElementsOutOfOrder (p:ps) (q:qs) = p == q && arrayElementsOutOfOrder ps qs 
