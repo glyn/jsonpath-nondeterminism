@@ -6,6 +6,7 @@ module Lib
     , root
     , childWildcard
     , descendantWildcard
+    , unitTests
     ) where
 
 import Data.Aeson
@@ -14,6 +15,7 @@ import qualified Data.Aeson.Key as K
 import Data.List (permutations)
 import qualified Data.Set as Set
 import Data.Vector (toList, (!), Vector)
+import Test.HUnit (Test(..), assertEqual, test)
 
 type Nodelist = [Value] -- omit locations
 
@@ -41,7 +43,7 @@ childWildcard (n:ns) = uniq (do
           children _ = [[]]
 
 -- descendantWildcard is a query corresponding to ..[*]
--- It is non-deterministic when it traverses over an object with more than one member
+-- It is non-deterministic in certain cases.
 descendantWildcard :: Query
 descendantWildcard [] = [[]]
 descendantWildcard (n:ns) = uniq (do
@@ -54,6 +56,21 @@ descendantWildcard (n:ns) = uniq (do
           descendants p (Object o) = objectChildren p o ++ [ x | (k,v) <- KM.toList o, x <- descendants (p++[Member $ K.toString k]) v]
           descendants p (Array a) = arrayChildren p a ++ [x | i <- [0..(length a - 1)], x <- descendants (p++[Element i]) $ a ! i]
           descendants _ _ = []
+
+-- inputAndDescendants is a query corresponding to ..
+-- The syntax .. (on its own) is not supported in RFC 9535, although it is used to define ..[*].
+-- It is non-deterministic when it traverses over an object with more than one member and in some cases where
+-- descendants of one node are interleaved with descendants of another node.
+-- inputAndDescendants :: Query
+-- inputAndDescendants [] = [[]]
+-- inputAndDescendants (n:ns) = uniq (do
+--     l :: Nodelist <- map (map snd) $ filter validDescendantOrdering $ permutations $ ([], n):descendants [] n
+--     r :: Nodelist <- descendantWildcard ns
+--     return (l ++ r))
+--     where descendants :: Path -> Value -> [(Path,Value)] -- input value must be a child of the argument at location denoted by the input path
+--           descendants p (Object o) = objectChildren p o ++ [ x | (k,v) <- KM.toList o, x <- descendants (p++[Member $ K.toString k]) v]
+--           descendants p (Array a) = arrayChildren p a ++ [x | i <- [0..(length a - 1)], x <- descendants (p++[Element i]) $ a ! i]
+--           descendants _ _ = []
 
 type Path = [PathItem]
 data PathItem = Member String | Element Int
@@ -87,3 +104,18 @@ arrayElementsOutOfOrder (p:ps) (q:qs) = p == q && arrayElementsOutOfOrder ps qs
 -- The implementation ensures that the result list is sorted
 uniq :: Ord a => [a] -> [a]
 uniq = Set.toList . Set.fromList
+
+unitTests :: Test
+unitTests = test [testUniqRemdup
+                 ,testUniqSort
+                 ]
+
+testUniqRemdup :: Test
+testUniqRemdup = TestCase ( assertEqual "removes duplicates" expected (uniq input) )
+    where input :: [Int] = [0,1,2,1,0]
+          expected = [0,1,2]
+
+testUniqSort :: Test
+testUniqSort = TestCase ( assertEqual "sorts result" expected (uniq input) )
+    where input :: [Int] = [2,0,0,2,1]
+          expected = [0,1,2]
