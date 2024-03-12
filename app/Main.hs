@@ -7,14 +7,13 @@ module Main (main) where
 import Data.Aeson
 import Data.Aeson.QQ
 import qualified Data.ByteString.Lazy.Char8 as BSL
-import Data.Set (fromList, toList)
 import Lib
 
 
 main :: IO ()
 
 main = do
-         mapM_ (BSL.putStrLn . addNewline . encode . uniq) ([
+         mapM_ (BSL.putStrLn . addNewline . encode) ([
             do -- [*] applied to an object (dervied from $.o[*] example of Table 6 in RFC 9535)
               nl :: Nodelist <- root [aesonQQ| {"j": 1, "k": 2} |]
               childWildcard nl,
@@ -67,11 +66,6 @@ main = do
                                                } |]
               descendantWildcard nl
             ] :: [[Nodelist]])
-
--- Remove duplicates from the input list
--- The implementation ensures that the result list is sorted
-uniq :: Ord a => [a] -> [a]
-uniq = toList . fromList
 
 addNewline :: BSL.ByteString -> BSL.ByteString
 addNewline bs = BSL.snoc bs '\n'

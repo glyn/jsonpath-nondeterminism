@@ -12,6 +12,7 @@ import Data.Aeson
 import qualified Data.Aeson.KeyMap as KM
 import qualified Data.Aeson.Key as K
 import Data.List (permutations)
+import qualified Data.Set as Set
 import Data.Vector (toList, (!), Vector)
 
 type Nodelist = [Value] -- omit locations
@@ -30,10 +31,10 @@ root v = [[v]]
 -- It is non-deterministic when applied to an object with more than one member.
 childWildcard :: Query
 childWildcard [] = [[]]
-childWildcard (n:ns) = do
+childWildcard (n:ns) = uniq (do
     l :: Nodelist <- children n
     r :: Nodelist <- childWildcard ns
-    return (l ++ r)
+    return (l ++ r))
     where children :: Value -> [Nodelist] -- input value must be a child of the argument
           children (Object o) = permutations $ KM.elems o
           children (Array a) = [toList a]
@@ -43,12 +44,12 @@ childWildcard (n:ns) = do
 -- It is non-deterministic when it traverses over an object with more than one member
 descendantWildcard :: Query
 descendantWildcard [] = [[]]
-descendantWildcard (n:ns) = do
+descendantWildcard (n:ns) = uniq (do
     l :: Nodelist <- map (map snd) $ filter validDescendantOrdering $ permutations $ ([], n):descendants [] n
     r :: Nodelist <- descendantWildcard ns
     let inputNodeAndDescendants = l ++ r
     -- as per the spec, descendantWildcard is childWildcard applied to the node and its descendants
-    childWildcard inputNodeAndDescendants
+    childWildcard inputNodeAndDescendants)
     where descendants :: Path -> Value -> [(Path,Value)] -- input value must be a child of the argument at location denoted by the input path
           descendants p (Object o) = objectChildren p o ++ [ x | (k,v) <- KM.toList o, x <- descendants (p++[Member $ K.toString k]) v]
           descendants p (Array a) = arrayChildren p a ++ [x | i <- [0..(length a - 1)], x <- descendants (p++[Element i]) $ a ! i]
@@ -80,4 +81,9 @@ arrayElementsOutOfOrder :: Path -> Path -> Bool
 arrayElementsOutOfOrder [] _ = False  
 arrayElementsOutOfOrder _ [] = False  
 arrayElementsOutOfOrder [Element m] [Element n] = m >= n  
-arrayElementsOutOfOrder (p:ps) (q:qs) = p == q && arrayElementsOutOfOrder ps qs 
+arrayElementsOutOfOrder (p:ps) (q:qs) = p == q && arrayElementsOutOfOrder ps qs
+
+-- Remove duplicates from the input list
+-- The implementation ensures that the result list is sorted
+uniq :: Ord a => [a] -> [a]
+uniq = Set.toList . Set.fromList
