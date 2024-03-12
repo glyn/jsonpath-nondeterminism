@@ -46,31 +46,25 @@ childWildcard (n:ns) = uniq (do
 -- It is non-deterministic in certain cases.
 descendantWildcard :: Query
 descendantWildcard [] = [[]]
-descendantWildcard (n:ns) = uniq (do
+descendantWildcard nl = uniq (do
+    -- as per the spec, descendantWildcard is childWildcard applied to the node and its descendants
+    inputNodeAndDescendants <- inputAndDescendants nl
+    childWildcard inputNodeAndDescendants)
+
+-- inputAndDescendants is a query corresponding to ..
+-- The syntax .. (on its own) is not supported in RFC 9535, although its semantics is used to define ..[*].
+-- It is non-deterministic when it traverses over an object with more than one member and in some cases where
+-- descendants of one node are interleaved with descendants of another node.
+inputAndDescendants :: Query
+inputAndDescendants [] = [[]]
+inputAndDescendants (n:ns) = uniq (do
     l :: Nodelist <- map (map snd) $ filter validDescendantOrdering $ permutations $ ([], n):descendants [] n
     r :: Nodelist <- descendantWildcard ns
-    let inputNodeAndDescendants = l ++ r
-    -- as per the spec, descendantWildcard is childWildcard applied to the node and its descendants
-    childWildcard inputNodeAndDescendants)
+    return (l ++ r))
     where descendants :: Path -> Value -> [(Path,Value)] -- input value must be a child of the argument at location denoted by the input path
           descendants p (Object o) = objectChildren p o ++ [ x | (k,v) <- KM.toList o, x <- descendants (p++[Member $ K.toString k]) v]
           descendants p (Array a) = arrayChildren p a ++ [x | i <- [0..(length a - 1)], x <- descendants (p++[Element i]) $ a ! i]
           descendants _ _ = []
-
--- inputAndDescendants is a query corresponding to ..
--- The syntax .. (on its own) is not supported in RFC 9535, although it is used to define ..[*].
--- It is non-deterministic when it traverses over an object with more than one member and in some cases where
--- descendants of one node are interleaved with descendants of another node.
--- inputAndDescendants :: Query
--- inputAndDescendants [] = [[]]
--- inputAndDescendants (n:ns) = uniq (do
---     l :: Nodelist <- map (map snd) $ filter validDescendantOrdering $ permutations $ ([], n):descendants [] n
---     r :: Nodelist <- descendantWildcard ns
---     return (l ++ r))
---     where descendants :: Path -> Value -> [(Path,Value)] -- input value must be a child of the argument at location denoted by the input path
---           descendants p (Object o) = objectChildren p o ++ [ x | (k,v) <- KM.toList o, x <- descendants (p++[Member $ K.toString k]) v]
---           descendants p (Array a) = arrayChildren p a ++ [x | i <- [0..(length a - 1)], x <- descendants (p++[Element i]) $ a ! i]
---           descendants _ _ = []
 
 type Path = [PathItem]
 data PathItem = Member String | Element Int
