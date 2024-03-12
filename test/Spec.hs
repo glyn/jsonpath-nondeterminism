@@ -9,7 +9,7 @@ main = do
         runTestTTAndExit (test [testChildWildcard1
                                ,testChildWildcard2
                                ,testChildWildcard3
-                               --,testDescendantWildcard -- FIXME: this test appears to hang
+                               --,testDescendantWildcard -- FIXME: this test takes several minutes to complete
                                ,testDescendantWildcard1
                                ,testDescendantWildcard2
                                ,unitTests                   
@@ -41,7 +41,7 @@ testChildWildcard3 = TestCase ( assertEqual "[*] applied to an array (derived fr
           val3 = [aesonQQ| 3 |]
           expected = [[val5, val3]]
 
--- FIXME: the following test seems to hang consuming CPU
+-- FIXME: The following test takes several minutes to complete
 testDescendantWildcard :: Test
 testDescendantWildcard = TestCase ( assertEqual "..[*] test in Table 16 in RFC 9535)" expected (descendantWildcard input) )
     where arg = [aesonQQ| {"o": {"j": 1, "k": 2}
