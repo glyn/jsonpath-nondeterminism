@@ -46,7 +46,8 @@ descendantWildcard [] = [[]]
 descendantWildcard (n:ns) = do
     l :: Nodelist <- map (map snd) $ filter validDescendantOrdering $ permutations $ ([], n):descendants [] n
     r :: Nodelist <- descendantWildcard ns
-    return (l ++ r)
+    let desc = l ++ r
+    childWildcard desc
     where descendants :: Path -> Value -> [(Path,Value)] -- input value must be a child of the argument at location denoted by the input path
           descendants p (Object o) = objectChildren p o ++ [ x | (k,v) <- KM.toList o, x <- descendants (p++[Member $ K.toString k]) v]
           descendants p (Array a) = arrayChildren p a ++ [x | i <- [0..(length a - 1)], x <- descendants (p++[Element i]) $ a ! i]
