@@ -65,6 +65,14 @@ main = do
           (\r -> do
               nl :: Nodelist <- r
               descendantWildcard nl),
+
+          runQuery "the descendants (.. - not allowed by RFC) of an array containing a non-empty array and something else"
+          [aesonQQ| [ [1]
+                    , 2
+                    ] |]
+          (\r -> do
+              nl :: Nodelist <- r
+              inputAndDescendants nl),
           
           runQuery "..[*] applied to an object"
           [aesonQQ| { "x": 1

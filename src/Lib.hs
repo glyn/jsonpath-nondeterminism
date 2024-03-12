@@ -6,6 +6,7 @@ module Lib
     , root
     , childWildcard
     , descendantWildcard
+    , inputAndDescendants
     , unitTests
     ) where
 
