@@ -60,6 +60,9 @@ descendantWildcard nl = uniq (do
 inputAndDescendants :: Query
 inputAndDescendants [] = [[]]
 inputAndDescendants (n:ns) = uniq (do
+    -- To generate all valid non-deterministic orderings of the input node and its descendants, a list of all
+    -- permutations of the list of descendants (annotated with their paths) is filtered according to the rules
+    -- in RFC 9535 (Section 2.5.2.2). Then the annotations are removed. 
     l :: Nodelist <- map (map snd) $ filter validDescendantOrdering $ permutations $ ([], n):descendants [] n
     r :: Nodelist <- descendantWildcard ns
     return (l ++ r))
