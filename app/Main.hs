@@ -73,6 +73,22 @@ main = do
           (\r -> do
               nl :: Nodelist <- r
               inputAndDescendants nl),
+
+          runQuery "..[*] applied to a carefully chosen nested collection of arrays"
+          [aesonQQ| [ [[1]]
+                    , [2]
+                    ] |]
+          (\r -> do
+              nl :: Nodelist <- r
+              descendantWildcard nl),
+
+          runQuery "the descendants (.. - not allowed by RFC) of a carefully chosen nested collection of arrays"
+          [aesonQQ| [ [[1]]
+                    , [2]
+                    ] |]
+          (\r -> do
+              nl :: Nodelist <- r
+              inputAndDescendants nl),
           
           runQuery "..[*] applied to an object"
           [aesonQQ| { "x": 1
