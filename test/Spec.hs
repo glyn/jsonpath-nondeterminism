@@ -9,6 +9,8 @@ main = do
         runTestTTAndExit (test [testChildWildcard1
                                ,testChildWildcard2
                                ,testChildWildcard3
+                               ,testDescendantWildcard1
+                               ,testDescendantWildcard2
                                ,unitTests                   
                                ])
 
@@ -37,3 +39,26 @@ testChildWildcard3 = TestCase ( assertEqual "[*] applied to an array (derived fr
           val5 = [aesonQQ| 5 |]
           val3 = [aesonQQ| 3 |]
           expected = [[val5, val3]]
+
+testDescendantWildcard1 :: Test
+testDescendantWildcard1 = TestCase ( assertEqual "..[*] test derived from example in Table 16 in RFC 9535)" expected (descendantWildcard input) )
+    where arg = [aesonQQ| {"a": [5, 3, [{"j": 4}, {"k": 6}]]} |]
+          input = [arg]
+          val3 = [aesonQQ| 3 |]
+          val4 = [aesonQQ| 4 |]
+          val5 = [aesonQQ| 5 |]
+          val6 = [aesonQQ| 6 |]
+          valArray1 = [aesonQQ| [5, 3, [{"j": 4}, {"k": 6}]] |]
+          valArray2 = [aesonQQ| [{"j": 4}, {"k": 6}] |]
+          valObj1 = [aesonQQ| {"j": 4} |]
+          valObj2 = [aesonQQ| {"k": 6} |]
+          expected = [[valArray1, val5, val3, valArray2, valObj1, valObj2, val4, val6]]
+
+testDescendantWildcard2 :: Test
+testDescendantWildcard2 = TestCase ( assertEqual "another ..[*] test derived from example in Table 16 in RFC 9535)" expected (descendantWildcard input) )
+    where arg = [aesonQQ| {"o": {"j": 1, "k": 2}} |]
+          input = [arg]
+          val1 = [aesonQQ| 1 |]
+          val2 = [aesonQQ| 2 |]
+          valObj = [aesonQQ| {"j": 1, "k": 2} |]
+          expected = [[valObj, val1, val2], [valObj, val2, val1]]
