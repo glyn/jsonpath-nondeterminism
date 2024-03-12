@@ -40,6 +40,7 @@ library
     , bytestring ==0.11.*
     , containers ==0.6.*
     , transformers ==0.6.*
+    , utf8-string >=1.0.2 && <1.1
     , vector ==0.13.*
   default-language: Haskell2010
 
@@ -60,6 +61,7 @@ executable jsonpath-non-determinism-exe
     , containers ==0.6.*
     , jsonpath-non-determinism
     , transformers ==0.6.*
+    , utf8-string >=1.0.2 && <1.1
     , vector ==0.13.*
   default-language: Haskell2010
 
@@ -81,5 +83,6 @@ test-suite jsonpath-non-determinism-test
     , containers ==0.6.*
     , jsonpath-non-determinism
     , transformers ==0.6.*
+    , utf8-string >=1.0.2 && <1.1
     , vector ==0.13.*
   default-language: Haskell2010
