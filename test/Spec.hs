@@ -9,7 +9,7 @@ main = do
         runTestTTAndExit (test [testChildWildcard1
                                ,testChildWildcard2
                                ,testChildWildcard3
-                               --,testDescendantWildcard -- FIXME: this test appears to hang
+                               ,testDescendantWildcard -- FIXME: this test appears to hang
                                ,testDescendantWildcard1
                                ,testDescendantWildcard2
                                ,unitTests                   
