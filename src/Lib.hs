@@ -49,6 +49,7 @@ descendantWildcard :: Query
 descendantWildcard [] = [[]]
 descendantWildcard nl = uniq (do
     -- as per the spec, descendantWildcard is childWildcard applied to the node and its descendants
+    -- See https://www.rfc-editor.org/rfc/rfc9535#section-2.5.2.2
     inputNodeAndDescendants <- inputAndDescendants nl
     childWildcard inputNodeAndDescendants)
 
@@ -83,6 +84,7 @@ validDescendantOrdering [_] = True
 validDescendantOrdering (x@(px,_):y@(py,_):xs) = validBefore px py && validDescendantOrdering (x:xs) && validDescendantOrdering (y:xs)
 
 validBefore :: Path -> Path -> Bool
+-- See https://www.rfc-editor.org/rfc/rfc9535#section-2.5.2.2
 validBefore x y = not (childBeforeParent x y || arrayElementsOutOfOrder x y)
 
 childBeforeParent :: Path -> Path -> Bool
