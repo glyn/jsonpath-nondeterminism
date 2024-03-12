@@ -44,7 +44,7 @@ childWildcard (n:ns) = do
 descendantWildcard :: Query
 descendantWildcard [] = [[]]
 descendantWildcard (n:ns) = do
-    l :: Nodelist <- map (map snd) $ filter validDescendantOrdering $ permutations $ descendants [] n
+    l :: Nodelist <- map (map snd) $ filter validDescendantOrdering $ permutations $ ([], n):descendants [] n
     r :: Nodelist <- descendantWildcard ns
     return (l ++ r)
     where descendants :: Path -> Value -> [(Path,Value)] -- input value must be a child of the argument at location denoted by the input path
