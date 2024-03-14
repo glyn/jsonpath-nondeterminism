@@ -62,8 +62,15 @@ inputAndDescendants [] = [[]]
 inputAndDescendants (n:ns) = uniq (do
     -- To generate all valid non-deterministic orderings of the input node and its descendants, a list of all
     -- permutations of the list of descendants (annotated with their paths) is filtered according to the rules
-    -- in RFC 9535 (Section 2.5.2.2). Then the annotations are removed. 
-    l :: Nodelist <- map (map snd) $ filter validDescendantOrdering $ permutations $ ([], n):descendants [] n
+    -- in RFC 9535 (Section 2.5.2.2). Then the annotations are removed.
+
+    -- OPT: factor of 3 improvement by factoring out the root node from the permutations and adding it back in at the end 
+    -- l :: Nodelist <- map (map snd) $ filter validDescendantOrdering $ permutations $ ([], n):descendants [] n
+    -- OPT: factor of two by addings root node in after filter
+    -- l :: Nodelist <- map (map snd) $ filter validDescendantOrdering $ map (([], n):) $ permutations $ descendants [] n
+    -- OPT: combining maps slows things down
+    l :: Nodelist <- map (map snd) $ map (([], n):) $ filter validDescendantOrdering $ permutations $ descendants [] n
+
     r :: Nodelist <- descendantWildcard ns
     return (l ++ r))
     where descendants :: Path -> Value -> [(Path,Value)] -- input value must be a child of the argument at location denoted by the input path
@@ -88,16 +95,22 @@ validDescendantOrdering (x@(px,_):y@(py,_):xs) = validBefore px py && validDesce
 
 validBefore :: Path -> Path -> Bool
 -- See https://www.rfc-editor.org/rfc/rfc9535#section-2.5.2.2
-validBefore x y = not (childBeforeParent x y || arrayElementsOutOfOrder x y)
+-- OPT: validBefore x y = not (childBeforeParent x y || arrayElementsOutOfOrder x y) was slower than the following
+validBefore x y = not (arrayElementsOutOfOrder x y || childBeforeParent x y)
 
 childBeforeParent :: Path -> Path -> Bool
 childBeforeParent [] _ = False
 childBeforeParent p q = init p == q
+-- OPT: following version only gave 5% improvement
+-- childBeforeParent [] _ = False
+-- childBeforeParent p [] = length p == 1
+-- childBeforeParent (p:ps) (q:qs) = (p == q) && not (null ps) && (init ps == qs)
     
 arrayElementsOutOfOrder :: Path -> Path -> Bool
 arrayElementsOutOfOrder [] _ = False  
 arrayElementsOutOfOrder _ [] = False  
-arrayElementsOutOfOrder [Element m] [Element n] = m >= n  
+arrayElementsOutOfOrder [Element m] [Element n] = m >= n
+-- OPT: && is strict in its first argument
 arrayElementsOutOfOrder (p:ps) (q:qs) = p == q && arrayElementsOutOfOrder ps qs
 
 -- Remove duplicates from the input list
