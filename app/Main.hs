@@ -20,20 +20,21 @@ main = do
           -- 2.03s user 0.08s system 98% cpu 2.140 total
           -- 0.64s user 0.01s system 97% cpu 0.669 total - factor of 3 improvement by factoring out root node from permutations
           -- 0.30s user 0.01s system 95% cpu 0.324 total - factor of 2 improvement by adding root node in aftger filtering
-                    runQuery "..[*] example from Table 16 in RFC 9535" -- takes several minutes to evaluate
-          [aesonQQ| {"o": {"j": 1}
-                    ,"a": [5, [{"j": 4}, {"k": 6}]]
-                    } |]
-          (\r -> do
-              nl :: Nodelist <- r
-              descendantWildcard nl)
           --           runQuery "..[*] example from Table 16 in RFC 9535" -- takes several minutes to evaluate
-          -- [aesonQQ| {"o": {"j": 1, "k": 2}
-          --           ,"a": [5, 3, [{"j": 4}, {"k": 6}]]
+          -- [aesonQQ| {"o": {"j": 1}
+          --           ,"a": [5, [{"j": 4}, {"k": 6}]]
           --           } |]
           -- (\r -> do
           --     nl :: Nodelist <- r
           --     descendantWildcard nl)
+          -- OPT: 37.34s user 0.64s system 99% cpu 38.267 total with above optimisations
+                    runQuery "..[*] example from Table 16 in RFC 9535" -- takes several minutes to evaluate
+          [aesonQQ| {"o": {"j": 1, "k": 2}
+                    ,"a": [5, 3, [{"j": 4}, {"k": 6}]]
+                    } |]
+          (\r -> do
+              nl :: Nodelist <- r
+              descendantWildcard nl)
           -- runQuery "[*] applied to an object (derived from $.o[*] example of Table 6 in RFC 9535)"
           -- [aesonQQ| {"j": 1, "k": 2} |]
           -- (\r -> (do
