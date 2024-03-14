@@ -29,6 +29,8 @@ main = do
           --     descendantWildcard nl)
           -- 304.71s user 6.17s system 99% cpu 5:13.02 total before optimisation
           -- OPT: 37.34s user 0.64s system 99% cpu 38.267 total with above optimisations (factor of 8)
+          -- OPT 0.01s user 0.00s system 58% cpu 0.024 total after discarding children of objects before permutation (further factor of 1594)
+          -- OPT: 0.00s user 0.01s system 50% cpu 0.015 total after discarding children of arrays before permutation (further factor of 1.6)
                     runQuery "..[*] example from Table 16 in RFC 9535" -- takes several minutes to evaluate
           [aesonQQ| {"o": {"j": 1, "k": 2}
                     ,"a": [5, 3, [{"j": 4}, {"k": 6}]]
@@ -85,14 +87,6 @@ main = do
           --     nl :: Nodelist <- r
           --     descendantWildcard nl),
 
-          -- runQuery "the descendants (.. - not allowed by RFC) of an array containing a non-empty array and something else"
-          -- [aesonQQ| [ [1]
-          --           , 2
-          --           ] |]
-          -- (\r -> do
-          --     nl :: Nodelist <- r
-          --     inputAndDescendants nl),
-
           -- runQuery "..[*] applied to a carefully chosen nested collection of arrays"
           -- [aesonQQ| [ [[1]]
           --           , [2]
@@ -100,14 +94,6 @@ main = do
           -- (\r -> do
           --     nl :: Nodelist <- r
           --     descendantWildcard nl),
-
-          -- runQuery "the descendants (.. - not allowed by RFC) of a carefully chosen nested collection of arrays"
-          -- [aesonQQ| [ [[1]]
-          --           , [2]
-          --           ] |]
-          -- (\r -> do
-          --     nl :: Nodelist <- r
-          --     inputAndDescendants nl),
           
           -- runQuery "..[*] applied to an object"
           -- [aesonQQ| { "x": 1

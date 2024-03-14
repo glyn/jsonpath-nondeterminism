@@ -6,7 +6,6 @@ module Lib
     , root
     , childWildcard
     , descendantWildcard
-    , inputAndDescendants
     , unitTests
     ) where
 
@@ -50,18 +49,15 @@ descendantWildcard [] = [[]]
 descendantWildcard nl = uniq (do
     -- as per the spec, descendantWildcard is childWildcard applied to the node and its descendants
     -- See https://www.rfc-editor.org/rfc/rfc9535#section-2.5.2.2
-    inputNodeAndDescendants <- inputAndDescendants nl
+    inputNodeAndDescendants <- inputAndStructuredDescendants nl
     childWildcard inputNodeAndDescendants)
 
--- inputAndDescendants is a query corresponding to ..
--- The syntax .. (on its own) is not supported in RFC 9535, although its semantics is used to define ..[*].
--- It is non-deterministic when it traverses over an object with more than one member and in some cases where
--- descendants of one node are interleaved with descendants of another node.
-inputAndDescendants :: Query
-inputAndDescendants [] = [[]]
-inputAndDescendants (n:ns) = uniq (do
-    -- To generate all valid non-deterministic orderings of the input node and its descendants, a list of all
-    -- permutations of the list of descendants (annotated with their paths) is filtered according to the rules
+-- inputAndStructuredDescendants is a query corresponding to .. except that primitive descendants are discarded
+inputAndStructuredDescendants :: Query
+inputAndStructuredDescendants [] = [[]]
+inputAndStructuredDescendants (n:ns) = uniq (do
+    -- To generate all valid non-deterministic orderings of the input node and its structured descendants, a list of all
+    -- permutations of the list of structured descendants (annotated with their paths) is filtered according to the rules
     -- in RFC 9535 (Section 2.5.2.2). Then the annotations are removed.
 
     -- OPT: factor of 3 improvement by factoring out the root node from the permutations and adding it back in at the end 
@@ -74,19 +70,28 @@ inputAndDescendants (n:ns) = uniq (do
     r :: Nodelist <- descendantWildcard ns
     return (l ++ r))
     where descendants :: Path -> Value -> [(Path,Value)] -- input value must be a child of the argument at location denoted by the input path
-          descendants p (Object o) = objectChildren p o ++ [ x | (k,v) <- KM.toList o, x <- descendants (p++[Member $ K.toString k]) v]
-          descendants p (Array a) = arrayChildren p a ++ [x | i <- [0..(length a - 1)], x <- descendants (p++[Element i]) $ a ! i]
+          descendants p (Object o) = objectStructuredChildren p o ++ [ x | (k,v) <- KM.toList o, x <- descendants (p++[Member $ K.toString k]) v]
+          descendants p (Array a) = arrayStructuredChildren p a ++ [x | i <- [0..(length a - 1)], x <- descendants (p++[Element i]) $ a ! i]
           descendants _ _ = []
 
 type Path = [PathItem]
 data PathItem = Member String | Element Int
                 deriving Eq
 
-objectChildren :: Path -> KM.KeyMap Value -> [(Path, Value)]
-objectChildren p km = [(p++[Member $ K.toString k],v) | (k,v) <- KM.toList km]
+-- objectStructuredChildren returns the annotated childen of an object which are structured (i.e. not primitives)
+-- (primitives would be discarded later)
+objectStructuredChildren :: Path -> KM.KeyMap Value -> [(Path, Value)]
+objectStructuredChildren p km = [(p++[Member $ K.toString k],v) | (k,v) <- KM.toList km, not $ primitive v]
 
-arrayChildren :: Path -> Vector Value -> [(Path, Value)]
-arrayChildren p v = [(p++[Element i], v ! i) | i <- [0.. length (toList v) - 1]]
+-- arrayStructuredChildren returns the annotated childen of an array which are structured (i.e. not primitives)
+-- (primitives would be discarded later)
+arrayStructuredChildren :: Path -> Vector Value -> [(Path, Value)]
+arrayStructuredChildren p v = filter (not . primitive . snd) [(p++[Element i], v ! i) | i <- [0.. length (toList v) - 1]]
+
+primitive :: Value -> Bool
+primitive (Object _) = False
+primitive (Array _) = False
+primitive _ = True
 
 validDescendantOrdering :: [(Path,Value)] -> Bool
 validDescendantOrdering [] = True
