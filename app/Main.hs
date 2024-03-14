@@ -27,7 +27,8 @@ main = do
           -- (\r -> do
           --     nl :: Nodelist <- r
           --     descendantWildcard nl)
-          -- OPT: 37.34s user 0.64s system 99% cpu 38.267 total with above optimisations
+          -- 304.71s user 6.17s system 99% cpu 5:13.02 total before optimisation
+          -- OPT: 37.34s user 0.64s system 99% cpu 38.267 total with above optimisations (factor of 8)
                     runQuery "..[*] example from Table 16 in RFC 9535" -- takes several minutes to evaluate
           [aesonQQ| {"o": {"j": 1, "k": 2}
                     ,"a": [5, 3, [{"j": 4}, {"k": 6}]]
