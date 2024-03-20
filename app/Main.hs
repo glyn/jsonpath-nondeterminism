@@ -112,6 +112,14 @@ main = do
                     } |]
           (\r -> do
               nl :: Nodelist <- r
+              descendantWildcard nl),
+
+          runQuery "..[*] applied to a carefully chosen nested collection of objects"
+          [aesonQQ| {"a": {"c": {"e": 1}}
+                    ,"b": {"d": 2}
+                    } |]
+          (\r -> do
+              nl :: Nodelist <- r
               descendantWildcard nl)
             ]
 
